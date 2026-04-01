@@ -1,0 +1,146 @@
+// UseCase4RoomSearch.java
+
+import java.util.*;
+
+// Abstract Room Class
+abstract class Room {
+    private String roomType;
+    private int numberOfBeds;
+    private double pricePerNight;
+
+    public Room(String roomType, int numberOfBeds, double pricePerNight) {
+        this.roomType = roomType;
+        this.numberOfBeds = numberOfBeds;
+        this.pricePerNight = pricePerNight;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public int getNumberOfBeds() {
+        return numberOfBeds;
+    }
+
+    public double getPricePerNight() {
+        return pricePerNight;
+    }
+
+    public abstract void displayRoomDetails();
+}
+
+// Concrete Room Classes
+class SingleRoom extends Room {
+    public SingleRoom() {
+        super("Single Room", 1, 1000.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price: ₹" + getPricePerNight());
+    }
+}
+
+class DoubleRoom extends Room {
+    public DoubleRoom() {
+        super("Double Room", 2, 1800.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price: ₹" + getPricePerNight());
+    }
+}
+
+class SuiteRoom extends Room {
+    public SuiteRoom() {
+        super("Suite Room", 3, 3000.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price: ₹" + getPricePerNight());
+    }
+}
+
+// Inventory Class (Centralized State)
+class RoomInventory {
+    private Map<String, Integer> availabilityMap;
+
+    public RoomInventory() {
+        availabilityMap = new HashMap<>();
+    }
+
+    public void addRoom(String roomType, int count) {
+        availabilityMap.put(roomType, count);
+    }
+
+    public int getAvailability(String roomType) {
+        return availabilityMap.getOrDefault(roomType, 0);
+    }
+
+    public Map<String, Integer> getAllAvailability() {
+        return availabilityMap; // read-only usage expected
+    }
+}
+
+// Search Service (NEW CONCEPT)
+class RoomSearchService {
+
+    public void searchAvailableRooms(List<Room> rooms, RoomInventory inventory) {
+
+        System.out.println("=== Available Rooms ===\n");
+
+        boolean found = false;
+
+        for (Room room : rooms) {
+
+            int available = inventory.getAvailability(room.getRoomType());
+
+            // Defensive Programming: Only show available rooms
+            if (available > 0) {
+                room.displayRoomDetails();
+                System.out.println("Available: " + available + "\n");
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No rooms available at the moment.");
+        }
+    }
+}
+
+// Main Class
+public class UseCase4RoomSearch {
+
+    public static void main(String[] args) {
+
+        // Room Objects (Domain)
+        Room single = new SingleRoom();
+        Room doubleR = new DoubleRoom();
+        Room suite = new SuiteRoom();
+
+        List<Room> roomList = Arrays.asList(single, doubleR, suite);
+
+        // Inventory Setup
+        RoomInventory inventory = new RoomInventory();
+        inventory.addRoom("Single Room", 5);
+        inventory.addRoom("Double Room", 0); // Not available
+        inventory.addRoom("Suite Room", 2);
+
+        // Search Service
+        RoomSearchService searchService = new RoomSearchService();
+
+        // Perform Search (Read-Only)
+        searchService.searchAvailableRooms(roomList, inventory);
+
+        System.out.println("\n=== End of Program ===");
+    }
+}
