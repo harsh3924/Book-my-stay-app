@@ -1,0 +1,98 @@
+import java.util.*;
+
+class Booking {
+    String bookingId;
+    String roomType;
+    String roomId;
+    boolean isCancelled;
+
+    public Booking(String bookingId, String roomType, String roomId) {
+        this.bookingId = bookingId;
+        this.roomType = roomType;
+        this.roomId = roomId;
+        this.isCancelled = false;
+    }
+}
+
+public class UseCase10BookingCancellation {
+
+    static Map<String, Integer> inventory = new HashMap<>();
+    static Map<String, Queue<String>> roomPool = new HashMap<>();
+    static Map<String, Booking> bookings = new HashMap<>();
+    static Stack<String> rollbackStack = new Stack<>();
+
+    static void initializeSystem() {
+        inventory.put("Single", 2);
+        inventory.put("Double", 2);
+
+        roomPool.put("Single", new LinkedList<>(Arrays.asList("S1", "S2")));
+        roomPool.put("Double", new LinkedList<>(Arrays.asList("D1", "D2")));
+    }
+
+    static void createBooking(String bookingId, String roomType) {
+        if (!inventory.containsKey(roomType) || inventory.get(roomType) == 0) {
+            System.out.println("No rooms available for type: " + roomType);
+            return;
+        }
+
+        String roomId = roomPool.get(roomType).poll();
+        inventory.put(roomType, inventory.get(roomType) - 1);
+
+        Booking booking = new Booking(bookingId, roomType, roomId);
+        bookings.put(bookingId, booking);
+
+        System.out.println("Booking Confirmed: " + bookingId + " | Room: " + roomId);
+    }
+
+    static void cancelBooking(String bookingId) {
+        if (!bookings.containsKey(bookingId)) {
+            System.out.println("Invalid Booking ID. Cancellation failed.");
+            return;
+        }
+
+        Booking booking = bookings.get(bookingId);
+
+        if (booking.isCancelled) {
+            System.out.println("Booking already cancelled.");
+            return;
+        }
+
+        rollbackStack.push(booking.roomId);
+        inventory.put(booking.roomType, inventory.get(booking.roomType) + 1);
+        roomPool.get(booking.roomType).offer(booking.roomId);
+        booking.isCancelled = true;
+
+        System.out.println("Booking Cancelled Successfully: " + bookingId);
+    }
+
+    static void displayStatus() {
+        System.out.println("\n--- Inventory Status ---");
+        for (String type : inventory.keySet()) {
+            System.out.println(type + " Rooms Available: " + inventory.get(type));
+        }
+
+        System.out.println("\n--- Rollback Stack ---");
+        System.out.println(rollbackStack);
+
+        System.out.println("\n--- Booking Records ---");
+        for (Booking b : bookings.values()) {
+            System.out.println(b.bookingId + " | " + b.roomType + " | " + b.roomId + " | Cancelled: " + b.isCancelled);
+        }
+    }
+
+    public static void main(String[] args) {
+        initializeSystem();
+
+        createBooking("B101", "Single");
+        createBooking("B102", "Double");
+
+        displayStatus();
+
+        cancelBooking("B101");
+
+        displayStatus();
+
+        cancelBooking("B999");
+        cancelBooking("B101");
+    }
+}
