@@ -1,0 +1,104 @@
+import java.io.*;
+import java.util.*;
+
+class Booking implements Serializable {
+    private static final long serialVersionUID = 1L;
+    String user;
+    String roomType;
+
+    Booking(String user, String roomType) {
+        this.user = user;
+        this.roomType = roomType;
+    }
+
+    public String toString() {
+        return user + " booked " + roomType;
+    }
+}
+
+class Inventory implements Serializable {
+    private static final long serialVersionUID = 1L;
+    Map<String, Integer> rooms = new HashMap<>();
+
+    void addRoom(String type, int count) {
+        rooms.put(type, rooms.getOrDefault(type, 0) + count);
+    }
+
+    boolean bookRoom(String type) {
+        if (rooms.getOrDefault(type, 0) > 0) {
+            rooms.put(type, rooms.get(type) - 1);
+            return true;
+        }
+        return false;
+    }
+
+    public String toString() {
+        return rooms.toString();
+    }
+}
+
+class SystemState implements Serializable {
+    private static final long serialVersionUID = 1L;
+    Inventory inventory;
+    List<Booking> bookings;
+
+    SystemState(Inventory inventory, List<Booking> bookings) {
+        this.inventory = inventory;
+        this.bookings = bookings;
+    }
+}
+
+class PersistenceService {
+    private static final String FILE_NAME = "system_state.dat";
+
+    static void save(SystemState state) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(state);
+            System.out.println("State saved successfully");
+        } catch (Exception e) {
+            System.out.println("Error saving state");
+        }
+    }
+
+    static SystemState load() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            System.out.println("State loaded successfully");
+            return (SystemState) ois.readObject();
+        } catch (Exception e) {
+            System.out.println("No valid saved state found. Starting fresh.");
+            return null;
+        }
+    }
+}
+
+public class UseCase12DataPersistenceRecovery {
+    public static void main(String[] args) {
+        SystemState state = PersistenceService.load();
+
+        Inventory inventory;
+        List<Booking> bookings;
+
+        if (state == null) {
+            inventory = new Inventory();
+            bookings = new ArrayList<>();
+            inventory.addRoom("Single", 2);
+            inventory.addRoom("Double", 2);
+        } else {
+            inventory = state.inventory;
+            bookings = state.bookings;
+        }
+
+        if (inventory.bookRoom("Single")) {
+            Booking b = new Booking("Harsh", "Single");
+            bookings.add(b);
+            System.out.println(b);
+        } else {
+            System.out.println("No rooms available");
+        }
+
+        System.out.println("Inventory: " + inventory);
+        System.out.println("Bookings: " + bookings);
+
+        PersistenceService.save(new SystemState(inventory, bookings));
+    }
+}
