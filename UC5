@@ -1,0 +1,88 @@
+import java.util.*;
+
+// Reservation class - represents a guest booking request
+class Reservation {
+    private String guestName;
+    private String roomType;
+
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
+
+    public String getGuestName() {
+        return guestName;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation [Guest=" + guestName + ", Room Type=" + roomType + "]";
+    }
+}
+
+// BookingRequestQueue class - manages FIFO queue
+class BookingRequestQueue {
+    private Queue<Reservation> queue;
+
+    public BookingRequestQueue() {
+        queue = new LinkedList<>();
+    }
+
+    // Add booking request (enqueue)
+    public void addRequest(Reservation reservation) {
+        queue.offer(reservation);
+        System.out.println("Booking request added: " + reservation);
+    }
+
+    // View all pending requests
+    public void displayRequests() {
+        if (queue.isEmpty()) {
+            System.out.println("No pending booking requests.");
+            return;
+        }
+
+        System.out.println("\nPending Booking Requests (FIFO Order):");
+        for (Reservation r : queue) {
+            System.out.println(r);
+        }
+    }
+
+    // Get next request (without removing)
+    public Reservation peekNextRequest() {
+        return queue.peek();
+    }
+
+    // Process next request (dequeue)
+    public Reservation processNextRequest() {
+        return queue.poll();
+    }
+}
+
+// Main class
+public class UseCase5BookingRequestQueue {
+    public static void main(String[] args) {
+
+        BookingRequestQueue bookingQueue = new BookingRequestQueue();
+
+        // Simulating multiple booking requests
+        bookingQueue.addRequest(new Reservation("Harsh", "Deluxe"));
+        bookingQueue.addRequest(new Reservation("Amit", "Standard"));
+        bookingQueue.addRequest(new Reservation("Neha", "Suite"));
+
+        // Display queue
+        bookingQueue.displayRequests();
+
+        // Show next request
+        System.out.println("\nNext request to be processed: " + bookingQueue.peekNextRequest());
+
+        // Process one request
+        System.out.println("\nProcessing request: " + bookingQueue.processNextRequest());
+
+        // Display remaining queue
+        bookingQueue.displayRequests();
+    }
+}
