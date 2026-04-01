@@ -1,0 +1,154 @@
+// UseCase3InventorySetup.java
+
+import java.util.HashMap;
+import java.util.Map;
+
+// Abstract Room Class
+abstract class Room {
+    private String roomType;
+    private int numberOfBeds;
+    private double pricePerNight;
+
+    public Room(String roomType, int numberOfBeds, double pricePerNight) {
+        this.roomType = roomType;
+        this.numberOfBeds = numberOfBeds;
+        this.pricePerNight = pricePerNight;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public int getNumberOfBeds() {
+        return numberOfBeds;
+    }
+
+    public double getPricePerNight() {
+        return pricePerNight;
+    }
+
+    public abstract void displayRoomDetails();
+}
+
+// Single Room
+class SingleRoom extends Room {
+    public SingleRoom() {
+        super("Single Room", 1, 1000.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price per Night: ₹" + getPricePerNight());
+    }
+}
+
+// Double Room
+class DoubleRoom extends Room {
+    public DoubleRoom() {
+        super("Double Room", 2, 1800.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price per Night: ₹" + getPricePerNight());
+    }
+}
+
+// Suite Room
+class SuiteRoom extends Room {
+    public SuiteRoom() {
+        super("Suite Room", 3, 3000.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price per Night: ₹" + getPricePerNight());
+    }
+}
+
+// Inventory Class (NEW - Version 3.0 Concept)
+class RoomInventory {
+
+    private Map<String, Integer> availabilityMap;
+
+    // Constructor → Initialize Inventory
+    public RoomInventory() {
+        availabilityMap = new HashMap<>();
+    }
+
+    // Add Room Type with Count
+    public void addRoom(String roomType, int count) {
+        availabilityMap.put(roomType, count);
+    }
+
+    // Get Availability
+    public int getAvailability(String roomType) {
+        return availabilityMap.getOrDefault(roomType, 0);
+    }
+
+    // Update Availability (controlled)
+    public void updateAvailability(String roomType, int newCount) {
+        if (availabilityMap.containsKey(roomType)) {
+            availabilityMap.put(roomType, newCount);
+        } else {
+            System.out.println("Room type not found: " + roomType);
+        }
+    }
+
+    // Display Entire Inventory
+    public void displayInventory() {
+        System.out.println("=== Current Room Inventory ===");
+        for (Map.Entry<String, Integer> entry : availabilityMap.entrySet()) {
+            System.out.println(entry.getKey() + " -> Available: " + entry.getValue());
+        }
+    }
+}
+
+// Main Class
+public class UseCase3InventorySetup {
+
+    public static void main(String[] args) {
+
+        // Create Room Objects
+        Room single = new SingleRoom();
+        Room doubleR = new DoubleRoom();
+        Room suite = new SuiteRoom();
+
+        // Initialize Inventory
+        RoomInventory inventory = new RoomInventory();
+
+        // Register Room Types
+        inventory.addRoom(single.getRoomType(), 5);
+        inventory.addRoom(doubleR.getRoomType(), 3);
+        inventory.addRoom(suite.getRoomType(), 2);
+
+        // Display Room Details
+        System.out.println("=== Room Details ===\n");
+
+        single.displayRoomDetails();
+        System.out.println("Available: " + inventory.getAvailability(single.getRoomType()) + "\n");
+
+        doubleR.displayRoomDetails();
+        System.out.println("Available: " + inventory.getAvailability(doubleR.getRoomType()) + "\n");
+
+        suite.displayRoomDetails();
+        System.out.println("Available: " + inventory.getAvailability(suite.getRoomType()) + "\n");
+
+        // Display Full Inventory
+        inventory.displayInventory();
+
+        // Example Update
+        System.out.println("\nUpdating Single Room Availability...\n");
+        inventory.updateAvailability("Single Room", 4);
+
+        inventory.displayInventory();
+
+        System.out.println("\n=== End of Program ===");
+    }
+}
