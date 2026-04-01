@@ -1,0 +1,107 @@
+// UseCase2RoomInitialization.java
+
+// Abstract Class
+abstract class Room {
+    private String roomType;
+    private int numberOfBeds;
+    private double pricePerNight;
+
+    // Constructor
+    public Room(String roomType, int numberOfBeds, double pricePerNight) {
+        this.roomType = roomType;
+        this.numberOfBeds = numberOfBeds;
+        this.pricePerNight = pricePerNight;
+    }
+
+    // Getters (Encapsulation)
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public int getNumberOfBeds() {
+        return numberOfBeds;
+    }
+
+    public double getPricePerNight() {
+        return pricePerNight;
+    }
+
+    // Abstract Method
+    public abstract void displayRoomDetails();
+}
+
+// Single Room Class
+class SingleRoom extends Room {
+
+    public SingleRoom() {
+        super("Single Room", 1, 1000.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price per Night: ₹" + getPricePerNight());
+    }
+}
+
+// Double Room Class
+class DoubleRoom extends Room {
+
+    public DoubleRoom() {
+        super("Double Room", 2, 1800.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price per Night: ₹" + getPricePerNight());
+    }
+}
+
+// Suite Room Class
+class SuiteRoom extends Room {
+
+    public SuiteRoom() {
+        super("Suite Room", 3, 3000.0);
+    }
+
+    @Override
+    public void displayRoomDetails() {
+        System.out.println("Room Type: " + getRoomType());
+        System.out.println("Beds: " + getNumberOfBeds());
+        System.out.println("Price per Night: ₹" + getPricePerNight());
+    }
+}
+
+// Main Class
+public class UseCase2RoomInitialization {
+
+    public static void main(String[] args) {
+
+        // Polymorphism
+        Room singleRoom = new SingleRoom();
+        Room doubleRoom = new DoubleRoom();
+        Room suiteRoom = new SuiteRoom();
+
+        // Static Availability
+        int singleRoomAvailability = 5;
+        int doubleRoomAvailability = 3;
+        int suiteRoomAvailability = 2;
+
+        // Output
+        System.out.println("=== Room Details and Availability ===\n");
+
+        singleRoom.displayRoomDetails();
+        System.out.println("Available Rooms: " + singleRoomAvailability + "\n");
+
+        doubleRoom.displayRoomDetails();
+        System.out.println("Available Rooms: " + doubleRoomAvailability + "\n");
+
+        suiteRoom.displayRoomDetails();
+        System.out.println("Available Rooms: " + suiteRoomAvailability + "\n");
+
+        System.out.println("=== End of Program ===");
+    }
+}
