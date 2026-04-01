@@ -1,0 +1,98 @@
+import java.util.*;
+
+class BookingRequest {
+    String guestName;
+    String roomType;
+
+    public BookingRequest(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
+}
+
+class BookingSystem {
+
+    private Map<String, Integer> inventory = new HashMap<>();
+    private Map<String, Queue<String>> roomPool = new HashMap<>();
+    private Queue<BookingRequest> bookingQueue = new LinkedList<>();
+
+    public BookingSystem() {
+        inventory.put("Single", 2);
+        inventory.put("Double", 2);
+
+        roomPool.put("Single", new LinkedList<>(Arrays.asList("S1", "S2")));
+        roomPool.put("Double", new LinkedList<>(Arrays.asList("D1", "D2")));
+    }
+
+    public synchronized void addRequest(BookingRequest request) {
+        bookingQueue.offer(request);
+        System.out.println("Request Added: " + request.guestName + " -> " + request.roomType);
+    }
+
+    public synchronized BookingRequest getRequest() {
+        return bookingQueue.poll();
+    }
+
+    public void processBooking() {
+        while (true) {
+            BookingRequest request;
+
+            synchronized (this) {
+                request = getRequest();
+            }
+
+            if (request == null) {
+                break;
+            }
+
+            synchronized (this) {
+                if (inventory.getOrDefault(request.roomType, 0) > 0) {
+                    String roomId = roomPool.get(request.roomType).poll();
+                    inventory.put(request.roomType, inventory.get(request.roomType) - 1);
+
+                    System.out.println(Thread.currentThread().getName() +
+                            " booked " + roomId + " for " + request.guestName);
+                } else {
+                    System.out.println(Thread.currentThread().getName() +
+                            " failed for " + request.guestName + " (No rooms)");
+                }
+            }
+        }
+    }
+}
+
+class BookingProcessor extends Thread {
+
+    BookingSystem system;
+
+    public BookingProcessor(BookingSystem system, String name) {
+        super(name);
+        this.system = system;
+    }
+
+    public void run() {
+        system.processBooking();
+    }
+}
+
+public class UseCase11ConcurrentBookingSimulation {
+
+    public static void main(String[] args) {
+
+        BookingSystem system = new BookingSystem();
+
+        system.addRequest(new BookingRequest("Guest1", "Single"));
+        system.addRequest(new BookingRequest("Guest2", "Single"));
+        system.addRequest(new BookingRequest("Guest3", "Single"));
+        system.addRequest(new BookingRequest("Guest4", "Double"));
+        system.addRequest(new BookingRequest("Guest5", "Double"));
+
+        BookingProcessor t1 = new BookingProcessor(system, "Thread-1");
+        BookingProcessor t2 = new BookingProcessor(system, "Thread-2");
+        BookingProcessor t3 = new BookingProcessor(system, "Thread-3");
+
+        t1.start();
+        t2.start();
+        t3.start();
+    }
+}
